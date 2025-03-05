@@ -1,0 +1,41 @@
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: action
+name: grype-hybrid
+
+inputs:
+  binary-tar-path:
+    description: 'Path to the binary tar file to scan'
+    required: true
+
+
+runs:
+  using: composite
+  steps:
+    - name: Generate reference files 
+      uses: docker://public.ecr.aws/l7o7z1g8/actions/assets-plugin-chain-utils:d14621a0e281098b736a3d21cc92edd1fdc8b504
+      with:
+          entrypoint: assets-plugin-chain-utils
+          args: generate-references --asset-type "BINARY" --tags "BINARY_CONTAINER" --binary-tar-path ${{ inputs.binary-tar-path }}
+      env:
+          INPUT_CLOUDBEES_API_TOKEN: ${{ cloudbees.api.token }}
+          INPUT_CLOUDBEES_API_URL: ${{ cloudbees.api.url }}
+          INPUT_RUN_ID: ${{ cloudbees.run_id }}
+          
+    - name: Run grype compliance plugin
+      uses: docker://public.ecr.aws/l7o7z1g8/actions/assets-grype-scanner:c0a7492658472fbb0d6efd822c36207c83d44cea
+      env:
+          RUN_ID: ${{ cloudbees.run_id }}
+          JOB_ID: ${{ job.id }}
+          STEP_ID: ${{ step.internal.id }}
+      run: /app/plugin-grype-scanner -mode single
+
+    - name: Complete execution plan
+      uses: docker://public.ecr.aws/l7o7z1g8/actions/assets-plugin-chain-utils:d14621a0e281098b736a3d21cc92edd1fdc8b504
+      id: process-outputs
+      with:
+          entrypoint: assets-plugin-chain-utils
+          args: process-outputs
+      env:
+          INPUT_CLOUDBEES_API_TOKEN: ${{ cloudbees.api.token }}
+          INPUT_CLOUDBEES_API_URL: ${{ cloudbees.api.url }}
+          INPUT_RUN_ID: ${{ cloudbees.run_id }}
