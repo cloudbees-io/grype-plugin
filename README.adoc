@@ -1,6 +1,7 @@
 = CloudBees action: Scan with Grype
 
-Use this action to perform static application security testing (SAST) on a repository with the Grype scanner.
+Use this action to perform static application security testing (SAST) on code with Grype.
+Grype, an open-source scanning tool from Anchore, finds vulnerabilities in container images and filesystems.
 
 == Inputs
 
@@ -13,13 +14,12 @@ Use this action to perform static application security testing (SAST) on a repos
 | Required?
 | Description
 
-
 | `binary-tar-path`
 | String
 | Yes
-| Specify the path of the binary that should be scanned.
+| The path of the binary to be scanned.
 
-
+NOTE: The binary file must be in the TAR format.
 |===
 
 == Usage example
@@ -28,12 +28,10 @@ In your YAML file, add:
 
 [source,yaml]
 ----
-
       - name: Scan with Grype
-        uses: https://github.com/cloudbees-io/grype-plugin@v1
+        uses: cloudbees-io/grype-plugin@v1
         with:
-          binary-tar-path: tar file path that needs to be scanned
-
+          binary-tar-path: /path/to/binary.tar
 ----
 
 == License
