@@ -54,6 +54,10 @@ NOTE: The binary file must be in the TAR format.
 | String
 | The number of *Low* security findings discovered during the scan.
 
+| `policy-subject`
+| JSON
+| A JSON value containing details about the vulnerability scan summary and details.
+
 |===
 
 == Usage examples
@@ -130,6 +134,7 @@ jobs:
             echo "High count: ${{steps.grype-step.outputs.high-count}}"
             echo "Medium count: ${{steps.grype-step.outputs.medium-count}}"
             echo "Low count: ${{steps.grype-step.outputs.low-count}}"
+            echo "Policy subject: ${{steps.grype-step.outputs.policy-subject}}"
 
 
 ----
@@ -161,6 +166,7 @@ jobs:
       grype-job-output-high: ${{ steps.grype-step.outputs.high-count }}
       grype-job-output-medium: ${{ steps.grype-step.outputs.medium-count }}
       grype-job-output-low: ${{ steps.grype-step.outputs.low-count }}
+      grype-job-output-policy-subject: ${{ steps.grype-step.outputs.policy-subject }}
     steps:
       - name: check out source code
         uses: cloudbees-io/checkout@v1
@@ -189,6 +195,7 @@ jobs:
           echo "High count: ${{ needs.job1.outputs.grype-job-output-high }}"
           echo "Medium count: ${{ needs.job1.outputs.grype-job-output-medium }}"
           echo "Low count: ${{ needs.job1.outputs.grype-job-output-low }}"
+          echo "Policy subject: ${{ needs.job1.outputs.grype-job-output-policy-subject }}"
 
 ----
 
