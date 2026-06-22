@@ -22,12 +22,25 @@ outputs:
   low-count:
     description: A string containing the number of Low security findings discovered during the scan.
     value: ${{steps.process-outputs.outputs.low-count}}
+  policy-subject:
+    description: A json value containing the details about the vulnerability scan summary & details.
+    value: ${{steps.process-outputs.outputs.policy-subject}}
 
 runs:
   using: composite
   steps:
+    - name: Clear asset store for container scan
+      uses: docker://alpine:latest
+      shell: sh
+      run: |
+        find $CLOUDBEES_WORKSPACE/store -mindepth 2 -maxdepth 2 \
+          -type d ! -name "discovered-profile-findings" \
+          -exec rm -rf {} +
+        rm -rf $CLOUDBEES_WORKSPACE/store/binary-assets
+        rm -rf $CLOUDBEES_WORKSPACE/store/request
+
     - name: Generate reference files 
-      uses: docker://public.ecr.aws/l7o7z1g8/actions/assets-plugin-chain-utils:805ec930ea41c76375697b921a6a75601afaed3a
+      uses: docker://public.ecr.aws/l7o7z1g8/actions/assets-plugin-chain-utils:711eb70f766356e79b0ebbe7a30c03e1e9e67bb4
       with:
           entrypoint: assets-plugin-chain-utils
           args: generate-references --asset-type "BINARY" --tags "BINARY_CONTAINER" --binary-tar-path ${{ inputs.binary-tar-path }}
@@ -35,9 +48,10 @@ runs:
           INPUT_CLOUDBEES_API_TOKEN: ${{ cloudbees.api.token }}
           INPUT_CLOUDBEES_API_URL: ${{ cloudbees.api.url }}
           INPUT_RUN_ID: ${{ cloudbees.run_id }}
-          
+
     - name: Run grype compliance plugin
       uses: docker://public.ecr.aws/l7o7z1g8/actions/assets-grype-scanner:b1629a24bc9f100b6524f71b7680fc80953d9916
+      continue-on-error: true
       env:
           RUN_ID: ${{ cloudbees.run_id }}
           JOB_ID: ${{ job.id }}
@@ -45,7 +59,7 @@ runs:
       run: /app/plugin-grype-scanner -mode single
 
     - name: Complete execution plan
-      uses: docker://public.ecr.aws/l7o7z1g8/actions/assets-plugin-chain-utils:805ec930ea41c76375697b921a6a75601afaed3a
+      uses: docker://public.ecr.aws/l7o7z1g8/actions/assets-plugin-chain-utils:711eb70f766356e79b0ebbe7a30c03e1e9e67bb4
       id: process-outputs
       with:
           entrypoint: assets-plugin-chain-utils
