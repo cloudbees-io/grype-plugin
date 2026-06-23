@@ -33,11 +33,13 @@ runs:
       uses: docker://alpine:latest
       shell: sh
       run: |
-        find $CLOUDBEES_WORKSPACE/store -mindepth 2 -maxdepth 2 \
-          -type d ! -name "discovered-profile-findings" \
-          -exec rm -rf {} +
-        rm -rf $CLOUDBEES_WORKSPACE/store/binary-assets
-        rm -rf $CLOUDBEES_WORKSPACE/store/request
+        if [ -d "$CLOUDBEES_WORKSPACE/store" ]; then
+          find $CLOUDBEES_WORKSPACE/store -mindepth 2 -maxdepth 2 \
+            -type d ! -name "discovered-profile-findings" \
+            -exec rm -rf {} +
+          rm -rf $CLOUDBEES_WORKSPACE/store/binary-assets
+          rm -rf $CLOUDBEES_WORKSPACE/store/request
+        fi
 
     - name: Generate reference files 
       uses: docker://public.ecr.aws/l7o7z1g8/actions/assets-plugin-chain-utils:711eb70f766356e79b0ebbe7a30c03e1e9e67bb4
