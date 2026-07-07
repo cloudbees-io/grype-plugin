@@ -3,6 +3,7 @@
 Use this action to perform static application security testing (SAST) on code with Grype.
 Grype, an open-source scanning tool, finds vulnerabilities in container images and filesystems.
 You can also use the action output as a quality gate for the next step or job in your workflow.
+Testing adding a line for a PR.
 
 == Inputs
 
